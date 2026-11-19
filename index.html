@@ -771,7 +771,13 @@ body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;col
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+// ── EMAILJS CONFIG — preencha em emailjs.com (gratuito) ──────────────────
+const EMAILJS_PUBLIC_KEY  = 'SUA_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = 'SEU_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'SEU_TEMPLATE_ID';
+
 const TODAY = new Date();
 const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const WDS = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
@@ -1199,6 +1205,31 @@ async function initDb(){
   } catch(e){ DB=null; console.error('Firebase init:',e); }
 }
 
+async function sendAbsenceEmail(absence){
+  if(!EMAILJS_PUBLIC_KEY||EMAILJS_PUBLIC_KEY==='SUA_PUBLIC_KEY') return;
+  try{
+    const managerName=findManager(absence.employeeName)||'';
+    const managerEmail=(PROFILE_DATA[managerName]||{}).email||generateEmail(managerName);
+    if(!managerEmail) return;
+    emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
+    const p2=n=>String(n).padStart(2,'0');
+    const fmtDate=s=>{ const [y,m,d]=s.split('-'); return `${p2(d)}/${p2(m)}/${y}`; };
+    const days=daysBetween(absence.startDate,absence.endDate);
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+      to_email:managerEmail,
+      to_name:managerName,
+      employee_name:absence.employeeName,
+      employee_dept:absence.dept,
+      absence_type:(ABS_TYPES[absence.type]||{label:absence.type}).label,
+      start_date:fmtDate(absence.startDate),
+      end_date:fmtDate(absence.endDate),
+      days:days+' dia'+(days>1?'s':''),
+      reason:absence.reason||'Não informado',
+      portal_url:'https://ggc-1.vercel.app'
+    });
+  }catch(e){ console.warn('EmailJS erro:',e); }
+}
+
 function renderAbsences(){
   const c=document.getElementById('abs-content');
   if(!ME){ c.innerHTML=`<div class="abs-no-db" style="padding:30px 20px"><div style="font-size:32px;margin-bottom:8px">👤</div><div>Selecione seu perfil para registrar ausências.</div></div>`; return; }
@@ -1387,14 +1418,16 @@ async function submitAbsence(){
   if(s>e)[s,e]=[e,s];
   try{
     const id=crypto.randomUUID();
-    await DB.collection('ausencias').doc(id).set({
+    const absData={
       id,employeeName:ME.name,dept:ME.dept,
       type:document.getElementById('abs-type').value,
       startDate:s,endDate:e,
       reason:(document.getElementById('abs-reason')||{value:''}).value.trim(),
       status:'pendente',
       submittedAt:new Date().toISOString()
-    });
+    };
+    await DB.collection('ausencias').doc(id).set(absData);
+    sendAbsenceEmail(absData);
     absSel1=null; absSel2=null;
     const panel=document.getElementById('abs-sel-panel');if(panel)panel.hidden=true;
     const ri=document.getElementById('abs-reason');if(ri)ri.value='';
