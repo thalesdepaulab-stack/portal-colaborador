@@ -1211,7 +1211,7 @@ async function sendAbsenceEmail(absence){
   try{
     const managerName=findManager(absence.employeeName)||'';
     const managerEmail=(PROFILE_DATA[managerName]||{}).email||generateEmail(managerName);
-    if(!managerEmail) return;
+    if(!managerEmail && !EMAILJS_TEST_EMAIL) return;
     emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
     const p2=n=>String(n).padStart(2,'0');
     const fmtDate=s=>{ const [y,m,d]=s.split('-'); return `${p2(d)}/${p2(m)}/${y}`; };
