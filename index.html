@@ -541,8 +541,6 @@ body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;col
 /* toast notification */
 .portal-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:#1e293b;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.25)}
 .portal-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.abs-attach-link{font-size:11px;color:var(--accent);text-decoration:none;display:inline-block;margin-top:3px}
-.form-input-file{font-size:12px;color:var(--fg2);cursor:pointer;width:100%;padding:4px 0;background:none;border:none}
 
 </style>
 
@@ -773,7 +771,6 @@ body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;col
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script>
 const TODAY = new Date();
 const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -1242,12 +1239,6 @@ function renderAbsenceForm(){
             <input class="form-input" id="abs-reason" placeholder="Ex: consulta médica...">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Anexo — atestado ou comprovante (opcional)</label>
-            <input type="file" id="abs-attachment" accept=".pdf,image/*" class="form-input-file">
-          </div>
-        </div>
         <div class="form-footer">
           <span id="abs-info" class="form-info"></span>
           <button class="btn-submit" id="abs-submit">Enviar solicitação</button>
@@ -1396,29 +1387,17 @@ async function submitAbsence(){
   if(s>e)[s,e]=[e,s];
   try{
     const id=crypto.randomUUID();
-    let attachmentUrl=null;
-    const fileInput=document.getElementById('abs-attachment');
-    if(fileInput&&fileInput.files&&fileInput.files[0]){
-      btn.textContent='Enviando anexo...';
-      const file=fileInput.files[0];
-      const storage=firebase.storage();
-      const ref=storage.ref(`ausencias/${id}/${file.name}`);
-      await ref.put(file);
-      attachmentUrl=await ref.getDownloadURL();
-    }
     await DB.collection('ausencias').doc(id).set({
       id,employeeName:ME.name,dept:ME.dept,
       type:document.getElementById('abs-type').value,
       startDate:s,endDate:e,
       reason:(document.getElementById('abs-reason')||{value:''}).value.trim(),
-      attachmentUrl,
       status:'pendente',
       submittedAt:new Date().toISOString()
     });
     absSel1=null; absSel2=null;
     const panel=document.getElementById('abs-sel-panel');if(panel)panel.hidden=true;
     const ri=document.getElementById('abs-reason');if(ri)ri.value='';
-    if(fileInput)fileInput.value='';
     renderAbsCalendar();
     btn.disabled=false; btn.textContent='Enviado ✓';
     setTimeout(()=>{const b=document.getElementById('abs-submit');if(b)b.textContent='Enviar solicitação';},2500);
@@ -1463,7 +1442,6 @@ function renderAbsItem(a){
   const datesStr=a.startDate===a.endDate?fmtD(sd):`${fmtD(sd)} → ${fmtD(ed)}`;
   const statusMap={pendente:'Pendente',aprovado:'Aprovado',reprovado:'Reprovado'};
   const adminRow = isAdmin ? `<div class="abs-admin-name">${a.employeeName} · ${a.dept}</div>` : '';
-  const attachLink = a.attachmentUrl ? `<a class="abs-attach-link" href="${a.attachmentUrl}" target="_blank">📎 Ver anexo</a>` : '';
   return `<div class="abs-item">
     <div class="abs-icon" style="background:${t.bg}">${t.icon}</div>
     <div class="abs-info">
@@ -1471,7 +1449,6 @@ function renderAbsItem(a){
       <div class="abs-type">${t.label}</div>
       <div class="abs-dates">${datesStr}</div>
       ${a.reason?`<div class="abs-reason">${a.reason}</div>`:''}
-      ${attachLink}
     </div>
     <div class="abs-meta">
       <div class="abs-days">${days} dia${days>1?'s':''}</div>
