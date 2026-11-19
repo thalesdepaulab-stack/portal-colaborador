@@ -1829,16 +1829,7 @@ function renderInicio(){
         </div>`;
       }).join('')}</div>`;
 
-  const totalEmps=EMPLOYEES.length;
-  const thisMonthBdays=EMPLOYEES.filter(e=>{if(!e.birth)return false;const{month}=parseBirth(e.birth);return month===now.getMonth()+1;}).length;
-  const kpiHtml=`<div class="kpi-grid">
-    <div class="kpi-card"><div class="kpi-ic kpi-ic-blue">👥</div><div class="kpi-label">Colaboradores</div><div class="kpi-value">${totalEmps}</div><div class="kpi-sub">profissionais ativos</div></div>
-    <div class="kpi-card" onmouseenter="showBdayTip(this)" onmouseleave="hideBdayTip()"><div class="kpi-ic kpi-ic-orange">🎂</div><div class="kpi-label">Aniversários</div><div class="kpi-value">${thisMonthBdays}</div><div class="kpi-sub">este mês</div></div>
-  </div>`;
-
-
   wrap.innerHTML=`
-    ${kpiHtml}
     <div class="inicio-welcome">${welcomeHtml}</div>
     <div class="inicio-sec">
       <div class="inicio-sec-title">
