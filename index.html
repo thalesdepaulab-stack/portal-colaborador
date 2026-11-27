@@ -777,7 +777,7 @@ body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;col
 const EMAILJS_PUBLIC_KEY  = 'VjJ7VOk26XZyaplfG';
 const EMAILJS_SERVICE_ID  = 'service_88o4a8m';
 const EMAILJS_TEMPLATE_ID = 'template_y1o1yri';
-const EMAILJS_TEST_EMAIL  = 'thales.brito@grupoimpettus.com.br'; // remover após teste
+const EMAILJS_TEST_EMAIL  = '';
 
 const TODAY = new Date();
 const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -1221,13 +1221,13 @@ async function sendAbsenceEmail(absence){
   try{
     const managerName=findManager(absence.employeeName)||'';
     const managerEmail=(PROFILE_DATA[managerName]||{}).email||generateEmail(managerName);
-    if(!managerEmail && !EMAILJS_TEST_EMAIL) return;
+    if(!managerEmail) return;
     emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
     const p2=n=>String(n).padStart(2,'0');
     const fmtDate=s=>{ const [y,m,d]=s.split('-'); return `${p2(d)}/${p2(m)}/${y}`; };
     const days=daysBetween(absence.startDate,absence.endDate);
     await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
-      to_email:EMAILJS_TEST_EMAIL||managerEmail,
+      to_email:managerEmail,
       to_name:managerName,
       employee_name:absence.employeeName,
       employee_dept:absence.dept,
