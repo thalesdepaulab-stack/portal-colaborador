@@ -1185,13 +1185,15 @@ function renderBirthdays(){
   const nextMB=birthEmps.filter(e=>others(e)&&parseBirth(e.birth).month===nextM).sort((a,b)=>parseBirth(a.birth).day-parseBirth(b.birth).day);
   const todB=thisMB.filter(e=>parseBirth(e.birth).day===todD);
   const restB=thisMB.filter(e=>parseBirth(e.birth).day>todD);
+  const pastB=thisMB.filter(e=>parseBirth(e.birth).day<todD);
   const pill=document.getElementById('hdr-pill');
   const meToday=ME&&ME.birth&&parseBirth(ME.birth).day===todD&&parseBirth(ME.birth).month===thisM;
   if(todB.length||meToday){ const allTod=[...(meToday?[ME]:[]),...todB]; pill.textContent=allTod.length===1?`🎂 Hoje é aniversário de ${allTod[0].name.split(' ')[0]}!`:`🎂 ${allTod.length} colegas fazem aniversário hoje`; pill.hidden=false; } else { pill.hidden=true; }
-  if(todB.length){ html+=`<div class="sec-label">🎉 Hoje — colegas</div>`; html+=todB.map(e=>bItem(e,true)).join(''); if(restB.length) html+='<div class="divider"></div>'; }
+  if(todB.length){ html+=`<div class="sec-label">🎉 Hoje — colegas</div>`; html+=todB.map(e=>bItem(e,true)).join(''); if(restB.length||pastB.length) html+='<div class="divider"></div>'; }
   if(restB.length){ html+=`<div class="sec-label">Este mês — ${MONTHS[thisM-1]}</div>`; html+=restB.map(e=>bItem(e,false)).join(''); }
   else if(!todB.length&&thisMB.length){ html+=`<div class="sec-label">${MONTHS[thisM-1]}</div>`; html+=thisMB.map(e=>bItem(e,false)).join(''); }
-  else if(!todB.length&&!ME) html+='<div class="empty">Nenhum aniversário este mês</div>';
+  else if(!todB.length&&!thisMB.length&&!ME) html+='<div class="empty">Nenhum aniversário este mês</div>';
+  if(pastB.length){ if(restB.length||todB.length) html+='<div class="divider"></div>'; html+=`<div class="sec-label" style="opacity:.7">Já comemoramos — ${MONTHS[thisM-1]}</div>`; html+=pastB.map(e=>bItem(e,false)).join(''); }
   if(nextMB.length){ html+='<div class="divider"></div>'; html+=`<div class="sec-label">Próximo — ${MONTHS[nextM-1]}</div>`; nextMB.slice(0,4).forEach(e=>html+=bItem(e,false)); if(nextMB.length>4) html+=`<div class="empty" style="padding:8px 20px">+${nextMB.length-4} mais em ${MONTHS[nextM-1]}</div>`; }
   panel.innerHTML=html;
 }
