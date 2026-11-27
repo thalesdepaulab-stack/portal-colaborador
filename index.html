@@ -1984,17 +1984,6 @@ function renderMeuPerfil(){
   }
 
 
-  const reqBtns=[
-    {ic:'🌴',label:'Solicitar Férias',desc:'Agende seu período de descanso',bg:'#d1fae5'},
-    {ic:'📄',label:'Solicitar Documento',desc:'Carta, comprovante, declaração',bg:'#dbeafe'},
-    {ic:'🏠',label:'Home Office',desc:'Registrar dia em casa',bg:'#ede9fe'},
-    {ic:'💊',label:'Atestado Médico',desc:'Registrar afastamento',bg:'#fee2e2'},
-  ];
-  const reqHtml=`<div class="inicio-sec-title" style="margin-top:16px;margin-bottom:8px">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-    Solicitações Rápidas
-  </div>
-  <div class="req-grid">${reqBtns.map(b=>`<button class="req-btn" onclick="showToast('Funcionalidade em breve! 🚀')"><div class="req-btn-ic" style="background:${b.bg}">${b.ic}</div><div class="req-btn-label">${b.label}</div><div class="req-btn-desc">${b.desc}</div></button>`).join('')}</div>`;
 
   // Visão Geral
   document.getElementById('prf-sub-visao').innerHTML=`
@@ -2007,7 +1996,6 @@ function renderMeuPerfil(){
           <div class="meu-prf-hero-dept">${ME.dept}</div>
         </div>
       </div>
-      ${reqHtml}
       ${block('',
         row('💼','Cargo',ME.cargo),
         row('👤','Reporta a',manager),
