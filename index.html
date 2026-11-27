@@ -1236,7 +1236,7 @@ async function sendAbsenceEmail(absence){
       end_date:fmtDate(absence.endDate),
       days:days+' dia'+(days>1?'s':''),
       reason:absence.reason||'Não informado',
-      portal_url:'https://ggc-1.vercel.app'
+      portal_url:'https://portal-colaborador-sage.vercel.app'
     });
   }catch(e){ console.warn('EmailJS erro:',e); }
 }
